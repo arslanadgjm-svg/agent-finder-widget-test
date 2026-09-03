@@ -282,10 +282,6 @@
         if (saved.criteriaDefaults && Object.keys(saved.criteriaDefaults).length) {
           attrs['data-criteria-defaults'] = JSON.stringify(saved.criteriaDefaults);
         }
-        if (saved.marketId && saved.marketName) {
-          attrs['data-default-market-id'] = saved.marketId;
-          attrs['data-default-market-name'] = saved.marketName;
-        }
         if (saved.contactName) attrs['data-contact-name'] = saved.contactName;
         if (saved.contactEmail) attrs['data-contact-email'] = saved.contactEmail;
         if (saved.contactPhone) attrs['data-contact-phone'] = saved.contactPhone;

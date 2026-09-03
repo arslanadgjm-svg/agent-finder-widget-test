@@ -202,29 +202,6 @@
       gap: 14px;
     }
 
-    .checkbox-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-    }
-    .always-on-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--text-muted);
-      background: #f0f2f5;
-      border-radius: 6px;
-      padding: 6px 10px;
-      margin-bottom: 12px;
-    }
-
     .step-copy-block {
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -314,28 +291,18 @@
 
         <div class="form-card">
           <h2>Enabled Steps</h2>
-          <p class="section-desc">data-enabled-steps — restricts which optional steps show.</p>
-          <div class="always-on-badge">✓ Market and Contact Info always show, regardless of this setting</div>
-          <div class="checkbox-grid">
-            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="property_type"> Property Type</label>
-            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="strategy"> Strategy</label>
-            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="timeline"> Timeline</label>
-            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="price_range"> Price Range</label>
+          <p class="section-desc">data-enabled-steps — comma-separated step names. Market and Contact Info always show regardless of this setting, so they're not listed here.</p>
+          <div class="field-row">
+            <label>Steps</label>
+            <input type="text" id="enabled-steps" placeholder="e.g. property_type,strategy,timeline,price_range">
           </div>
-          <div class="field-hint">Leave all unchecked to show every step.</div>
+          <div class="field-hint">Leave blank to show every step.</div>
         </div>
 
         <div class="form-card">
           <h2>Step Copy Overrides</h2>
           <p class="section-desc">data-step-copy — override a step's title/description. Leave blank to use the default copy.</p>
 
-          <div class="step-copy-block">
-            <div class="step-name">Market</div>
-            <div class="two-col">
-              <div class="field-row"><label>Title</label><input type="text" data-step="market" data-field="title"></div>
-              <div class="field-row"><label>Description</label><input type="text" data-step="market" data-field="description"></div>
-            </div>
-          </div>
           <div class="step-copy-block">
             <div class="step-name">Property Type</div>
             <div class="two-col">
@@ -375,7 +342,7 @@
 
         <div class="form-card">
           <h2>Criteria Defaults</h2>
-          <p class="section-desc">data-criteria-defaults — pre-answers a question, skipping that step entirely.</p>
+          <p class="section-desc">data-criteria-defaults — fixed set of values, so these are dropdowns only. Selecting a value here pre-answers that question, so it won't appear as a step on the widget at all.</p>
           <div class="two-col">
             <div class="field-row">
               <label>Property Type</label>
@@ -398,22 +365,6 @@
               </select>
             </div>
           </div>
-        </div>
-
-        <div class="form-card">
-          <h2>Default Market</h2>
-          <p class="section-desc">data-default-market-id / data-default-market-name — pre-selects a market. Market never skips, even when set.</p>
-          <div class="two-col">
-            <div class="field-row">
-              <label>Market ID</label>
-              <input type="text" id="default-market-id" placeholder="e.g. 17237">
-            </div>
-            <div class="field-row">
-              <label>Market Name</label>
-              <input type="text" id="default-market-name" placeholder="e.g. Denver, CO">
-            </div>
-          </div>
-          <div class="field-hint">Both fields are required together — if only one is filled in, neither will be saved.</div>
         </div>
 
         <div class="form-card">
@@ -447,7 +398,7 @@
 
   <script>
     const STORAGE_KEY = 'bpAgentFinderPrepopulation';
-    const STEP_NAMES = ['market', 'property_type', 'strategy', 'timeline', 'price_range', 'contact_info'];
+    const STEP_NAMES = ['property_type', 'strategy', 'timeline', 'price_range', 'contact_info'];
 
     function loadSaved() {
       try {
@@ -461,10 +412,9 @@
     function populateForm(data) {
       if (!data) return;
 
-      (data.enabledSteps || []).forEach(function (step) {
-        const box = document.querySelector('input[name="enabledSteps"][value="' + step + '"]');
-        if (box) box.checked = true;
-      });
+      if (data.enabledSteps && data.enabledSteps.length) {
+        document.getElementById('enabled-steps').value = data.enabledSteps.join(',');
+      }
 
       Object.keys(data.stepCopy || {}).forEach(function (step) {
         const copy = data.stepCopy[step];
@@ -483,18 +433,16 @@
         }
       }
 
-      if (data.marketId) document.getElementById('default-market-id').value = data.marketId;
-      if (data.marketName) document.getElementById('default-market-name').value = data.marketName;
-
       if (data.contactName) document.getElementById('contact-name').value = data.contactName;
       if (data.contactEmail) document.getElementById('contact-email').value = data.contactEmail;
       if (data.contactPhone) document.getElementById('contact-phone').value = data.contactPhone;
     }
 
     function collectForm() {
-      const enabledSteps = Array.from(
-        document.querySelectorAll('input[name="enabledSteps"]:checked')
-      ).map(function (el) { return el.value; });
+      const enabledSteps = document.getElementById('enabled-steps').value
+        .split(',')
+        .map(function (s) { return s.trim(); })
+        .filter(function (s) { return s.length > 0; });
 
       const stepCopy = {};
       STEP_NAMES.forEach(function (step) {
@@ -513,19 +461,12 @@
       if (propertyType) criteriaDefaults.property_type = propertyType;
       if (strategy) criteriaDefaults.strategy = strategy;
 
-      const marketId = document.getElementById('default-market-id').value.trim();
-      const marketName = document.getElementById('default-market-name').value.trim();
-
       const contactName = document.getElementById('contact-name').value.trim();
       const contactEmail = document.getElementById('contact-email').value.trim();
       const contactPhone = document.getElementById('contact-phone').value.trim();
 
       const data = { enabledSteps: enabledSteps, stepCopy: stepCopy, criteriaDefaults: criteriaDefaults };
 
-      if (marketId && marketName) {
-        data.marketId = marketId;
-        data.marketName = marketName;
-      }
       if (contactName) data.contactName = contactName;
       if (contactEmail) data.contactEmail = contactEmail;
       if (contactPhone) data.contactPhone = contactPhone;
