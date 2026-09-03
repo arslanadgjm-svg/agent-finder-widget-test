@@ -273,12 +273,6 @@
       var attrs = { 'data-partner-id': PARTNER_ID };
 
       if (saved) {
-        if (saved.enabledSteps && saved.enabledSteps.length) {
-          attrs['data-enabled-steps'] = saved.enabledSteps.join(',');
-        }
-        if (saved.stepCopy && Object.keys(saved.stepCopy).length) {
-          attrs['data-step-copy'] = JSON.stringify(saved.stepCopy);
-        }
         if (saved.criteriaDefaults && Object.keys(saved.criteriaDefaults).length) {
           attrs['data-criteria-defaults'] = JSON.stringify(saved.criteriaDefaults);
         }

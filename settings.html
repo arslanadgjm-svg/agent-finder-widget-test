@@ -202,22 +202,6 @@
       gap: 14px;
     }
 
-    .step-copy-block {
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
-    }
-    .step-copy-block:last-child { margin-bottom: 0; }
-    .step-copy-block .step-name {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-    }
-
     .actions {
       width: 100%;
       max-width: 720px;
@@ -290,57 +274,6 @@
       <form id="prepop-form">
 
         <div class="form-card">
-          <h2>Enabled Steps</h2>
-          <p class="section-desc">data-enabled-steps — comma-separated step names. Market and Contact Info always show regardless of this setting, so they're not listed here.</p>
-          <div class="field-row">
-            <label>Steps</label>
-            <input type="text" id="enabled-steps" placeholder="e.g. property_type,strategy,timeline,price_range">
-          </div>
-          <div class="field-hint">Leave blank to show every step.</div>
-        </div>
-
-        <div class="form-card">
-          <h2>Step Copy Overrides</h2>
-          <p class="section-desc">data-step-copy — override a step's title/description. Leave blank to use the default copy.</p>
-
-          <div class="step-copy-block">
-            <div class="step-name">Property Type</div>
-            <div class="two-col">
-              <div class="field-row"><label>Title</label><input type="text" data-step="property_type" data-field="title"></div>
-              <div class="field-row"><label>Description</label><input type="text" data-step="property_type" data-field="description"></div>
-            </div>
-          </div>
-          <div class="step-copy-block">
-            <div class="step-name">Strategy</div>
-            <div class="two-col">
-              <div class="field-row"><label>Title</label><input type="text" data-step="strategy" data-field="title"></div>
-              <div class="field-row"><label>Description</label><input type="text" data-step="strategy" data-field="description"></div>
-            </div>
-          </div>
-          <div class="step-copy-block">
-            <div class="step-name">Timeline</div>
-            <div class="two-col">
-              <div class="field-row"><label>Title</label><input type="text" data-step="timeline" data-field="title"></div>
-              <div class="field-row"><label>Description</label><input type="text" data-step="timeline" data-field="description"></div>
-            </div>
-          </div>
-          <div class="step-copy-block">
-            <div class="step-name">Price Range</div>
-            <div class="two-col">
-              <div class="field-row"><label>Title</label><input type="text" data-step="price_range" data-field="title"></div>
-              <div class="field-row"><label>Description</label><input type="text" data-step="price_range" data-field="description"></div>
-            </div>
-          </div>
-          <div class="step-copy-block">
-            <div class="step-name">Contact Info</div>
-            <div class="two-col">
-              <div class="field-row"><label>Title</label><input type="text" data-step="contact_info" data-field="title"></div>
-              <div class="field-row"><label>Description</label><input type="text" data-step="contact_info" data-field="description"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-card">
           <h2>Criteria Defaults</h2>
           <p class="section-desc">data-criteria-defaults — fixed set of values, so these are dropdowns only. Selecting a value here pre-answers that question, so it won't appear as a step on the widget at all.</p>
           <div class="two-col">
@@ -365,6 +298,32 @@
               </select>
             </div>
           </div>
+          <div class="two-col">
+            <div class="field-row">
+              <label>Timeline</label>
+              <select id="criteria-timeline">
+                <option value="">— Not set —</option>
+                <option value="asap">ASAP</option>
+                <option value="1_to_3_months">1 - 3 months</option>
+                <option value="3_to_6_months">3 - 6 months</option>
+                <option value="more_than_6_months">6+ months</option>
+                <option value="not_sure">Not sure</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label>Price Range <span style="font-weight:400;color:var(--text-muted);">(unconfirmed — see note below)</span></label>
+              <select id="criteria-price-range">
+                <option value="">— Not set —</option>
+                <option value="less_than_250k">Under $250,000</option>
+                <option value="250k_to_500k">$250,000 - $500,000</option>
+                <option value="500k_to_750k">$500,000 - $750,000</option>
+                <option value="750k_to_1m">$750,000 - $1,000,000</option>
+                <option value="1m_plus">$1,000,000+</option>
+                <option value="not_sure">Not sure</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-hint">Price Range is a UI-only convenience on the backend that maps to minimum_target_price/maximum_target_price — it's unconfirmed whether data-criteria-defaults accepts this raw key directly. Test empirically before relying on it.</div>
         </div>
 
         <div class="form-card">
@@ -398,7 +357,6 @@
 
   <script>
     const STORAGE_KEY = 'bpAgentFinderPrepopulation';
-    const STEP_NAMES = ['property_type', 'strategy', 'timeline', 'price_range', 'contact_info'];
 
     function loadSaved() {
       try {
@@ -412,24 +370,18 @@
     function populateForm(data) {
       if (!data) return;
 
-      if (data.enabledSteps && data.enabledSteps.length) {
-        document.getElementById('enabled-steps').value = data.enabledSteps.join(',');
-      }
-
-      Object.keys(data.stepCopy || {}).forEach(function (step) {
-        const copy = data.stepCopy[step];
-        const titleInput = document.querySelector('input[data-step="' + step + '"][data-field="title"]');
-        const descInput = document.querySelector('input[data-step="' + step + '"][data-field="description"]');
-        if (titleInput && copy.title) titleInput.value = copy.title;
-        if (descInput && copy.description) descInput.value = copy.description;
-      });
-
       if (data.criteriaDefaults) {
         if (data.criteriaDefaults.property_type) {
           document.getElementById('criteria-property-type').value = data.criteriaDefaults.property_type;
         }
         if (data.criteriaDefaults.strategy) {
           document.getElementById('criteria-strategy').value = data.criteriaDefaults.strategy;
+        }
+        if (data.criteriaDefaults.timeline) {
+          document.getElementById('criteria-timeline').value = data.criteriaDefaults.timeline;
+        }
+        if (data.criteriaDefaults.price_range) {
+          document.getElementById('criteria-price-range').value = data.criteriaDefaults.price_range;
         }
       }
 
@@ -439,33 +391,21 @@
     }
 
     function collectForm() {
-      const enabledSteps = document.getElementById('enabled-steps').value
-        .split(',')
-        .map(function (s) { return s.trim(); })
-        .filter(function (s) { return s.length > 0; });
-
-      const stepCopy = {};
-      STEP_NAMES.forEach(function (step) {
-        const title = document.querySelector('input[data-step="' + step + '"][data-field="title"]').value.trim();
-        const description = document.querySelector('input[data-step="' + step + '"][data-field="description"]').value.trim();
-        if (title || description) {
-          stepCopy[step] = {};
-          if (title) stepCopy[step].title = title;
-          if (description) stepCopy[step].description = description;
-        }
-      });
-
       const criteriaDefaults = {};
       const propertyType = document.getElementById('criteria-property-type').value;
       const strategy = document.getElementById('criteria-strategy').value;
+      const timeline = document.getElementById('criteria-timeline').value;
+      const priceRange = document.getElementById('criteria-price-range').value;
       if (propertyType) criteriaDefaults.property_type = propertyType;
       if (strategy) criteriaDefaults.strategy = strategy;
+      if (timeline) criteriaDefaults.timeline = timeline;
+      if (priceRange) criteriaDefaults.price_range = priceRange;
 
       const contactName = document.getElementById('contact-name').value.trim();
       const contactEmail = document.getElementById('contact-email').value.trim();
       const contactPhone = document.getElementById('contact-phone').value.trim();
 
-      const data = { enabledSteps: enabledSteps, stepCopy: stepCopy, criteriaDefaults: criteriaDefaults };
+      const data = { criteriaDefaults: criteriaDefaults };
 
       if (contactName) data.contactName = contactName;
       if (contactEmail) data.contactEmail = contactEmail;
