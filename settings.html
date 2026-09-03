@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Set Pre-population</title>
+  <style>
+    :root {
+      --bg: #0f1720;
+      --sidebar: #14202b;
+      --sidebar-hover: #1c2e3d;
+      --accent: #ff6a2b;
+      --accent-soft: #ffb088;
+      --content-bg: #f5f6f8;
+      --card-bg: #ffffff;
+      --text-dark: #1c2733;
+      --text-muted: #6b7785;
+      --border: #e6e8ec;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--content-bg);
+      color: var(--text-dark);
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      grid-template-rows: 64px 1fr;
+      grid-template-areas:
+        "topbar topbar"
+        "sidebar main";
+      min-height: 100vh;
+    }
+
+    .topbar {
+      grid-area: topbar;
+      background: var(--sidebar);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), #ff9a5a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: #b7c0c9;
+    }
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .sidebar {
+      grid-area: sidebar;
+      background: var(--sidebar);
+      padding: 20px 12px;
+      color: #cfd7de;
+    }
+    .nav-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6d7c88;
+      padding: 8px 12px 6px;
+      margin-top: 12px;
+    }
+    .nav-section-label:first-child { margin-top: 0; }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .nav-item:hover { background: var(--sidebar-hover); }
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(255,106,43,0.18), transparent);
+      color: #fff;
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+    .nav-icon {
+      width: 20px;
+      text-align: center;
+      opacity: 0.9;
+    }
+
+    .main {
+      grid-area: main;
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .page-heading {
+      width: 100%;
+      max-width: 720px;
+      margin-bottom: 20px;
+    }
+    .page-heading h1 {
+      font-size: 24px;
+      margin: 0 0 4px;
+    }
+    .page-heading p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 720px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(20, 32, 43, 0.06);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .form-card h2 {
+      font-size: 15px;
+      margin: 0 0 4px;
+    }
+    .form-card .section-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0 0 18px;
+    }
+
+    .field-row {
+      margin-bottom: 14px;
+    }
+    .field-row label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .field-row input[type="text"],
+    .field-row input[type="number"],
+    .field-row input[type="email"],
+    .field-row input[type="tel"],
+    .field-row select,
+    .field-row textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      color: var(--text-dark);
+    }
+    .field-row textarea { min-height: 56px; resize: vertical; }
+    .field-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .always-on-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: #f0f2f5;
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-bottom: 12px;
+    }
+
+    .step-copy-block {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .step-copy-block:last-child { margin-bottom: 0; }
+    .step-copy-block .step-name {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .actions {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    button {
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #e85a1e; }
+    .btn-secondary {
+      background: #fff;
+      color: var(--text-dark);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #f0f2f5; }
+    .save-status {
+      font-size: 13px;
+      color: #2f8a4c;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .save-status.visible { opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <span class="brand-mark">🏠</span>
+        BiggerPockets Agent Finder
+      </div>
+      <div class="topbar-right">
+        <span>test-partner</span>
+        <span class="avatar">TP</span>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <div class="nav-section-label">Overview</div>
+      <a class="nav-item" href="index.html"><span class="nav-icon">🔍</span> Find an Agent</a>
+      <a class="nav-item" href="#"><span class="nav-icon">📊</span> Dashboard</a>
+
+      <div class="nav-section-label">Resources</div>
+      <a class="nav-item active" href="settings.html"><span class="nav-icon">📚</span> Set Pre-population</a>
+      <a class="nav-item" href="#"><span class="nav-icon">💬</span> Support</a>
+
+      <div class="nav-section-label">Settings</div>
+      <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Preferences</a>
+    </div>
+
+    <div class="main">
+      <div class="page-heading">
+        <h1>Set Pre-population</h1>
+        <p>Set the widget's data-* attributes here. Saved values are picked up automatically the next time the embed on Find an Agent loads.</p>
+      </div>
+
+      <form id="prepop-form">
+
+        <div class="form-card">
+          <h2>Enabled Steps</h2>
+          <p class="section-desc">data-enabled-steps — restricts which optional steps show.</p>
+          <div class="always-on-badge">✓ Market and Contact Info always show, regardless of this setting</div>
+          <div class="checkbox-grid">
+            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="property_type"> Property Type</label>
+            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="strategy"> Strategy</label>
+            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="timeline"> Timeline</label>
+            <label class="checkbox-item"><input type="checkbox" name="enabledSteps" value="price_range"> Price Range</label>
+          </div>
+          <div class="field-hint">Leave all unchecked to show every step.</div>
+        </div>
+
+        <div class="form-card">
+          <h2>Step Copy Overrides</h2>
+          <p class="section-desc">data-step-copy — override a step's title/description. Leave blank to use the default copy.</p>
+
+          <div class="step-copy-block">
+            <div class="step-name">Market</div>
+            <div class="two-col">
+              <div class="field-row"><label>Title</label><input type="text" data-step="market" data-field="title"></div>
+              <div class="field-row"><label>Description</label><input type="text" data-step="market" data-field="description"></div>
+            </div>
+          </div>
+          <div class="step-copy-block">
+            <div class="step-name">Property Type</div>
+            <div class="two-col">
+              <div class="field-row"><label>Title</label><input type="text" data-step="property_type" data-field="title"></div>
+              <div class="field-row"><label>Description</label><input type="text" data-step="property_type" data-field="description"></div>
+            </div>
+          </div>
+          <div class="step-copy-block">
+            <div class="step-name">Strategy</div>
+            <div class="two-col">
+              <div class="field-row"><label>Title</label><input type="text" data-step="strategy" data-field="title"></div>
+              <div class="field-row"><label>Description</label><input type="text" data-step="strategy" data-field="description"></div>
+            </div>
+          </div>
+          <div class="step-copy-block">
+            <div class="step-name">Timeline</div>
+            <div class="two-col">
+              <div class="field-row"><label>Title</label><input type="text" data-step="timeline" data-field="title"></div>
+              <div class="field-row"><label>Description</label><input type="text" data-step="timeline" data-field="description"></div>
+            </div>
+          </div>
+          <div class="step-copy-block">
+            <div class="step-name">Price Range</div>
+            <div class="two-col">
+              <div class="field-row"><label>Title</label><input type="text" data-step="price_range" data-field="title"></div>
+              <div class="field-row"><label>Description</label><input type="text" data-step="price_range" data-field="description"></div>
+            </div>
+          </div>
+          <div class="step-copy-block">
+            <div class="step-name">Contact Info</div>
+            <div class="two-col">
+              <div class="field-row"><label>Title</label><input type="text" data-step="contact_info" data-field="title"></div>
+              <div class="field-row"><label>Description</label><input type="text" data-step="contact_info" data-field="description"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h2>Criteria Defaults</h2>
+          <p class="section-desc">data-criteria-defaults — pre-answers a question, skipping that step entirely.</p>
+          <div class="two-col">
+            <div class="field-row">
+              <label>Property Type</label>
+              <select id="criteria-property-type">
+                <option value="">— Not set —</option>
+                <option value="single_family">Single Family</option>
+                <option value="condo">Condo</option>
+                <option value="multi_family_2_to_4_units">Multi-Family (2-4 Units)</option>
+                <option value="multi_family_5_plus_units">Multi-Family (5+ Units)</option>
+                <option value="townhouse">Townhouse</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <label>Strategy</label>
+              <select id="criteria-strategy">
+                <option value="">— Not set —</option>
+                <option value="long_term_rental">Long Term Rental</option>
+                <option value="short_term_rental">Short Term Rental</option>
+                <option value="fix_and_flip">Fix and Flip</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <h2>Default Market</h2>
+          <p class="section-desc">data-default-market-id / data-default-market-name — pre-selects a market. Market never skips, even when set.</p>
+          <div class="two-col">
+            <div class="field-row">
+              <label>Market ID</label>
+              <input type="text" id="default-market-id" placeholder="e.g. 17237">
+            </div>
+            <div class="field-row">
+              <label>Market Name</label>
+              <input type="text" id="default-market-name" placeholder="e.g. Denver, CO">
+            </div>
+          </div>
+          <div class="field-hint">Both fields are required together — if only one is filled in, neither will be saved.</div>
+        </div>
+
+        <div class="form-card">
+          <h2>Contact Info Prefill</h2>
+          <p class="section-desc">data-contact-name / data-contact-email / data-contact-phone — pre-fills the contact-info step. Step still shows; SMS 2FA still runs on submit.</p>
+          <div class="field-row">
+            <label>Name</label>
+            <input type="text" id="contact-name" placeholder="e.g. Jane Doe">
+          </div>
+          <div class="two-col">
+            <div class="field-row">
+              <label>Email</label>
+              <input type="email" id="contact-email" placeholder="e.g. jane@example.com">
+            </div>
+            <div class="field-row">
+              <label>Phone</label>
+              <input type="tel" id="contact-phone" placeholder="e.g. 3035550182">
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">Save Pre-population</button>
+          <button type="button" class="btn-secondary" id="clear-btn">Clear All</button>
+          <span class="save-status" id="save-status">Saved</span>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'bpAgentFinderPrepopulation';
+    const STEP_NAMES = ['market', 'property_type', 'strategy', 'timeline', 'price_range', 'contact_info'];
+
+    function loadSaved() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function populateForm(data) {
+      if (!data) return;
+
+      (data.enabledSteps || []).forEach(function (step) {
+        const box = document.querySelector('input[name="enabledSteps"][value="' + step + '"]');
+        if (box) box.checked = true;
+      });
+
+      Object.keys(data.stepCopy || {}).forEach(function (step) {
+        const copy = data.stepCopy[step];
+        const titleInput = document.querySelector('input[data-step="' + step + '"][data-field="title"]');
+        const descInput = document.querySelector('input[data-step="' + step + '"][data-field="description"]');
+        if (titleInput && copy.title) titleInput.value = copy.title;
+        if (descInput && copy.description) descInput.value = copy.description;
+      });
+
+      if (data.criteriaDefaults) {
+        if (data.criteriaDefaults.property_type) {
+          document.getElementById('criteria-property-type').value = data.criteriaDefaults.property_type;
+        }
+        if (data.criteriaDefaults.strategy) {
+          document.getElementById('criteria-strategy').value = data.criteriaDefaults.strategy;
+        }
+      }
+
+      if (data.marketId) document.getElementById('default-market-id').value = data.marketId;
+      if (data.marketName) document.getElementById('default-market-name').value = data.marketName;
+
+      if (data.contactName) document.getElementById('contact-name').value = data.contactName;
+      if (data.contactEmail) document.getElementById('contact-email').value = data.contactEmail;
+      if (data.contactPhone) document.getElementById('contact-phone').value = data.contactPhone;
+    }
+
+    function collectForm() {
+      const enabledSteps = Array.from(
+        document.querySelectorAll('input[name="enabledSteps"]:checked')
+      ).map(function (el) { return el.value; });
+
+      const stepCopy = {};
+      STEP_NAMES.forEach(function (step) {
+        const title = document.querySelector('input[data-step="' + step + '"][data-field="title"]').value.trim();
+        const description = document.querySelector('input[data-step="' + step + '"][data-field="description"]').value.trim();
+        if (title || description) {
+          stepCopy[step] = {};
+          if (title) stepCopy[step].title = title;
+          if (description) stepCopy[step].description = description;
+        }
+      });
+
+      const criteriaDefaults = {};
+      const propertyType = document.getElementById('criteria-property-type').value;
+      const strategy = document.getElementById('criteria-strategy').value;
+      if (propertyType) criteriaDefaults.property_type = propertyType;
+      if (strategy) criteriaDefaults.strategy = strategy;
+
+      const marketId = document.getElementById('default-market-id').value.trim();
+      const marketName = document.getElementById('default-market-name').value.trim();
+
+      const contactName = document.getElementById('contact-name').value.trim();
+      const contactEmail = document.getElementById('contact-email').value.trim();
+      const contactPhone = document.getElementById('contact-phone').value.trim();
+
+      const data = { enabledSteps: enabledSteps, stepCopy: stepCopy, criteriaDefaults: criteriaDefaults };
+
+      if (marketId && marketName) {
+        data.marketId = marketId;
+        data.marketName = marketName;
+      }
+      if (contactName) data.contactName = contactName;
+      if (contactEmail) data.contactEmail = contactEmail;
+      if (contactPhone) data.contactPhone = contactPhone;
+
+      return data;
+    }
+
+    populateForm(loadSaved());
+
+    document.getElementById('prepop-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const data = collectForm();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (err) {
+        alert('Could not save to localStorage: ' + err.message);
+        return;
+      }
+      const status = document.getElementById('save-status');
+      status.classList.add('visible');
+      setTimeout(function () { status.classList.remove('visible'); }, 2000);
+    });
+
+    document.getElementById('clear-btn').addEventListener('click', function () {
+      localStorage.removeItem(STORAGE_KEY);
+      document.getElementById('prepop-form').reset();
+    });
+  </script>
+
+</body>
+</html>

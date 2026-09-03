@@ -110,6 +110,8 @@
       font-size: 14px;
       cursor: pointer;
       transition: background 0.15s ease;
+      text-decoration: none;
+      color: inherit;
     }
     .nav-item:hover { background: var(--sidebar-hover); }
     .nav-item.active {
@@ -219,15 +221,15 @@
 
     <div class="sidebar">
       <div class="nav-section-label">Overview</div>
-      <div class="nav-item active"><span class="nav-icon">🔍</span> Find an Agent</div>
-      <div class="nav-item"><span class="nav-icon">📊</span> Dashboard</div>
+      <a class="nav-item active" href="index.html"><span class="nav-icon">🔍</span> Find an Agent</a>
+      <a class="nav-item" href="#"><span class="nav-icon">📊</span> Dashboard</a>
 
       <div class="nav-section-label">Resources</div>
-      <div class="nav-item"><span class="nav-icon">📚</span> Guides</div>
-      <div class="nav-item"><span class="nav-icon">💬</span> Support</div>
+      <a class="nav-item" href="settings.html"><span class="nav-icon">📚</span> Set Pre-population</a>
+      <a class="nav-item" href="#"><span class="nav-icon">💬</span> Support</a>
 
       <div class="nav-section-label">Settings</div>
-      <div class="nav-item"><span class="nav-icon">⚙️</span> Preferences</div>
+      <a class="nav-item" href="#"><span class="nav-icon">⚙️</span> Preferences</a>
     </div>
 
     <div class="main">
@@ -236,12 +238,7 @@
         <p>Widget embed test — center panel below.</p>
       </div>
 
-      <div class="widget-card">
-        <script
-          src="https://www.biggerpockets.com/agent-finder.js"
-          data-partner-id="bp-internal-team"
-        ></script>
-      </div>
+      <div class="widget-card" id="widget-card"></div>
     </div>
 
     <div class="aside">
@@ -252,8 +249,71 @@
       <h3>Session</h3>
       <div class="stat-row"><span class="stat-label">Partner</span><span class="stat-value">test-partner</span></div>
       <div class="stat-row"><span class="stat-label">Origin</span><span class="stat-value">localhost:8090</span></div>
+      <h3>Active Pre-population</h3>
+      <div id="prepop-summary" class="tip-card">None saved — <a href="settings.html">set some</a>.</div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = 'bpAgentFinderPrepopulation';
+      var WIDGET_SRC = 'https://www.biggerpockets.com/agent-finder.js';
+      var PARTNER_ID = 'bp-internal-team';
+
+      function loadSaved() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      var saved = loadSaved();
+      var attrs = { 'data-partner-id': PARTNER_ID };
+
+      if (saved) {
+        if (saved.enabledSteps && saved.enabledSteps.length) {
+          attrs['data-enabled-steps'] = saved.enabledSteps.join(',');
+        }
+        if (saved.stepCopy && Object.keys(saved.stepCopy).length) {
+          attrs['data-step-copy'] = JSON.stringify(saved.stepCopy);
+        }
+        if (saved.criteriaDefaults && Object.keys(saved.criteriaDefaults).length) {
+          attrs['data-criteria-defaults'] = JSON.stringify(saved.criteriaDefaults);
+        }
+        if (saved.marketId && saved.marketName) {
+          attrs['data-default-market-id'] = saved.marketId;
+          attrs['data-default-market-name'] = saved.marketName;
+        }
+        if (saved.contactName) attrs['data-contact-name'] = saved.contactName;
+        if (saved.contactEmail) attrs['data-contact-email'] = saved.contactEmail;
+        if (saved.contactPhone) attrs['data-contact-phone'] = saved.contactPhone;
+      }
+
+      var script = document.createElement('script');
+      script.src = WIDGET_SRC;
+      Object.keys(attrs).forEach(function (name) {
+        script.setAttribute(name, attrs[name]);
+      });
+      document.getElementById('widget-card').appendChild(script);
+
+      var extraAttrs = Object.keys(attrs).filter(function (k) { return k !== 'data-partner-id'; });
+      if (extraAttrs.length) {
+        var list = document.createElement('div');
+        extraAttrs.forEach(function (name) {
+          var row = document.createElement('div');
+          row.style.marginBottom = '6px';
+          row.style.wordBreak = 'break-all';
+          row.innerHTML = '<strong>' + name + '</strong>: ' + attrs[name];
+          list.appendChild(row);
+        });
+        var summary = document.getElementById('prepop-summary');
+        summary.innerHTML = '';
+        summary.appendChild(list);
+      }
+    })();
+  </script>
 
 </body>
 </html>
